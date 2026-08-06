@@ -1,4 +1,33 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { loginAdmin } from "../services/authService";
+
 function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
+  const handleSubmit = async (e) => {
+      e.preventDefault();
+
+      setError("");
+      setLoading(true);
+
+      try {
+        const data = await loginAdmin(email, password);
+
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+
+        navigate("/dashboard");
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+  };
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
 
@@ -14,7 +43,7 @@ function Login() {
           </p>
         </div>
 
-        <form className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-5">
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -24,8 +53,11 @@ function Login() {
             <input
               type="email"
               placeholder="hr@company.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
               className="w-full px-4 py-3 border border-gray-300 rounded-lg
-                         focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        focus:outline-none focus:ring-2 focus:ring-gray-900"
             />
           </div>
 
@@ -37,17 +69,28 @@ function Login() {
             <input
               type="password"
               placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
               className="w-full px-4 py-3 border border-gray-300 rounded-lg
-                         focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        focus:outline-none focus:ring-2 focus:ring-gray-900"
             />
           </div>
 
+          {error && (
+            <p className="text-sm text-red-600">
+              {error}
+            </p>
+          )}
+
           <button
             type="submit"
+            disabled={loading}
             className="w-full bg-gray-900 text-white py-3 rounded-lg
-                       font-medium hover:bg-gray-800 transition"
+                      font-medium hover:bg-gray-800 transition
+                      disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            Sign In
+            {loading ? "Signing In..." : "Sign In"}
           </button>
 
         </form>
