@@ -1,10 +1,14 @@
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
-const dotenv = require("dotenv");
+
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
+const candidateRoutes = require("./routes/candidateRoutes");
+const offerRoutes = require("./routes/offerRoutes");
 
-dotenv.config();
+
 connectDB();
 
 const app = express();
@@ -13,8 +17,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+
 //Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/candidates", candidateRoutes);
+app.use("/api/offers", offerRoutes);
 
 // Test route
 app.get("/", (req, res) => {

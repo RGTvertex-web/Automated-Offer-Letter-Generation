@@ -16,3 +16,6 @@ client/dist/
 
 # Logs
 *.log
+
+# Google service account credentials
+server/credentials/

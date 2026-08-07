@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -11,6 +12,66 @@ function Dashboard() {
 
     navigate("/login");
   };
+
+  const [offerCount, setOfferCount] = useState(0);
+  const [emailCount, setEmailCount] = useState(0);
+
+  useEffect(() => {
+  const fetchOfferCount = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/offers"
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch offers");
+      }
+
+      const data = await response.json();
+
+      // Total offers
+      setOfferCount(data.count);
+
+      // Total emails successfully sent
+      const sentEmails = data.offers.filter(
+        (offer) => offer.emailStatus === "Sent"
+      ).length;
+
+      setEmailCount(sentEmails);
+
+    } catch (error) {
+      console.error("Dashboard offer count error:", error);
+    }
+  };
+
+  fetchOfferCount();
+  }, []);
+
+  const [candidateCount, setCandidateCount] = useState(0);
+  
+
+  useEffect(() => {
+  const fetchCandidateCount = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/candidates"
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch candidates");
+      }
+
+      const data = await response.json();
+
+      setCandidateCount(data.candidates.length);
+    } catch (error) {
+      console.error("Dashboard candidate count error:", error);
+    }
+  };
+
+  fetchCandidateCount();
+  }, []);
+
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -70,7 +131,7 @@ function Dashboard() {
             </p>
 
             <p className="text-3xl font-bold text-gray-900 mt-2">
-              0
+              {candidateCount}
             </p>
           </div>
 
@@ -78,9 +139,10 @@ function Dashboard() {
             <p className="text-sm text-gray-500">
               Offers Generated
             </p>
+            
 
             <p className="text-3xl font-bold text-gray-900 mt-2">
-              0
+              {offerCount}
             </p>
           </div>
 
@@ -90,7 +152,7 @@ function Dashboard() {
             </p>
 
             <p className="text-3xl font-bold text-gray-900 mt-2">
-              0
+              {emailCount}
             </p>
           </div>
 
@@ -106,8 +168,8 @@ function Dashboard() {
           <div className="flex flex-wrap gap-4">
 
             <button
-              className="bg-gray-900 text-white px-5 py-3 rounded-lg
-                         font-medium hover:bg-gray-800 transition"
+              onClick={() => navigate("/candidates")}
+              className="bg-gray-900 text-white px-5 py-3 rounded-lg font-medium hover:bg-gray-800 transition"
             >
               View Candidates
             </button>
@@ -120,6 +182,7 @@ function Dashboard() {
             </button>
 
             <button
+              onClick={() => navigate("/offer-history")}
               className="border border-gray-300 text-gray-700 px-5 py-3
                          rounded-lg font-medium hover:bg-gray-100 transition"
             >
