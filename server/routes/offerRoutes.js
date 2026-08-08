@@ -7,6 +7,7 @@ const { updateCandidateStatus } = require("../config/googleSheets");
 const router = express.Router();
 
 
+// Generate Offer
 router.post("/generate", async (req, res) => {
   try {
     const candidate = req.body;
@@ -18,96 +19,146 @@ router.post("/generate", async (req, res) => {
     }
 
     console.log("Generating offer for:", candidate.candidateName);
-    
-    
+
     // Check if an offer already exists for this candidate
     const existingOffer = await Offer.findOne({
-    candidateId: candidate.candidateId,
+      candidateId: candidate.candidateId,
     });
 
     if (existingOffer) {
-    return res.status(409).json({
+      return res.status(409).json({
         message: "Offer letter has already been generated for this candidate",
-    });
+      });
     }
 
+    // Convert start date
     const [day, month, year] = candidate.startDate.split("/");
 
     const dateOfJoining = new Date(
-    Number(year),
-    Number(month) - 1,
-    Number(day)
+      Number(year),
+      Number(month) - 1,
+      Number(day)
     );
 
+    // Create offer in MongoDB
     const offer = await Offer.create({
-        candidateId: candidate.candidateId,
-        candidateName: candidate.candidateName,
-        candidateEmail: candidate.email,
-        designation: candidate.designation,
-        department: candidate.department,
+      candidateId: candidate.candidateId,
+      candidateName: candidate.candidateName,
+      candidateEmail: candidate.email,
+      designation: candidate.designation,
+      department: candidate.department,
 
-        dateOfJoining: dateOfJoining,
+      dateOfJoining: dateOfJoining,
 
-        stipendOrCTC: candidate.stipend,
+      stipendOrCTC: candidate.stipend,
 
-        reportingManager: "HR Manager",
+      reportingManager: "HR Manager",
 
-        offerIssueDate: new Date(),
+      offerIssueDate: new Date(),
 
-        emailStatus: "Pending",
+      emailStatus: "Pending",
     });
 
     console.log("Offer saved to MongoDB:", offer._id);
 
+    // Generate PDF
     const pdfBuffer = await generateOfferPDF(candidate);
 
-    await transporter.sendMail({
-    from: process.env.EMAIL_USER,
-    to: candidate.email,
-    subject: `Internship Offer Letter - ${candidate.candidateName}`,
+    // ------------------------------------------------
+    // Send Email
+    // ------------------------------------------------
 
-    text: `Dear ${candidate.candidateName},
+    try {
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: candidate.email,
+        subject: `Internship Offer Letter - ${candidate.candidateName}`,
 
-    Congratulations!
+        text: `Dear ${candidate.candidateName},
 
-    Please find your internship offer letter attached.
+Congratulations!
 
-    Regards,
-    HR Department`,
+Please find your internship offer letter attached.
 
-    attachments: [
-        {
-        filename: `Offer_${candidate.candidateId}.pdf`,
-        content: pdfBuffer,
-        contentType: "application/pdf",
-        },
-    ],
-    });
-    offer.emailStatus = "Sent";
-    await offer.save();
+Regards,
+HR Department`,
 
-    await updateCandidateStatus(
-      process.env.GOOGLE_SHEET_ID,
-      "Sheet1",
-      candidate.candidateId,
-      "Offer Sent"
-    );
+        attachments: [
+          {
+            filename: `Offer_${candidate.candidateId}.pdf`,
+            content: pdfBuffer,
+            contentType: "application/pdf",
+          },
+        ],
+      });
 
-    console.log("Email sent successfully to:", candidate.email);
-    console.log("Email status updated to Sent");
-    
+      // Email successfully sent
+      offer.emailStatus = "Sent";
+      await offer.save();
 
-    res.setHeader("Content-Type", "application/pdf");
+      console.log("Email sent successfully to:", candidate.email);
+      console.log("Email status updated to Sent");
+
+    } catch (emailError) {
+      // Email failed
+      console.error(
+        "Email sending failed:",
+        emailError.message
+      );
+
+      offer.emailStatus = "Failed";
+      await offer.save();
+
+      return res.status(500).json({
+        message: "Offer generated, but email could not be sent",
+      });
+    }
+
+    // ------------------------------------------------
+    // Update Google Sheet
+    // ------------------------------------------------
+
+    try {
+      await updateCandidateStatus(
+        process.env.GOOGLE_SHEET_ID,
+        "Sheet1",
+        candidate.candidateId,
+        "Offer Sent"
+      );
+
+      console.log(
+        `Google Sheet status updated: ${candidate.candidateId} → Offer Sent`
+      );
+
+    } catch (sheetError) {
+      // Email was successful, so do not mark the offer as Failed
+      console.error(
+        "Google Sheet status update failed:",
+        sheetError.message
+      );
+    }
+
+    // ------------------------------------------------
+    // Send PDF to Frontend
+    // ------------------------------------------------
 
     res.setHeader(
-    "Content-Disposition",
-    `attachment; filename="Offer_${candidate.candidateId}.pdf"`
+      "Content-Type",
+      "application/pdf"
+    );
+
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="Offer_${candidate.candidateId}.pdf"`
     );
 
     res.send(pdfBuffer);
 
   } catch (error) {
-    console.error("Offer generation error:", error);
+    console.error(
+      "Offer generation error:",
+      error
+    );
 
     if (!res.headersSent) {
       res.status(500).json({
@@ -116,22 +167,32 @@ router.post("/generate", async (req, res) => {
     }
   }
 });
+
+
 // Get all generated offers
 router.get("/", async (req, res) => {
   try {
-    const offers = await Offer.find().sort({ createdAt: -1 });
+    const offers = await Offer.find().sort({
+      createdAt: -1,
+    });
 
     res.status(200).json({
       success: true,
       count: offers.length,
       offers,
     });
+
   } catch (error) {
-    console.error("Fetch offers error:", error);
+    console.error(
+      "Fetch offers error:",
+      error
+    );
 
     res.status(500).json({
       message: "Failed to fetch offers",
     });
   }
 });
+
+
 module.exports = router;
