@@ -126,17 +126,27 @@ function Candidates() {
                     </td>
 
                     <td className="px-5 py-4">
-                        <button
-                            onClick={() =>
-                            navigate("/generate-offer", {
-                                state: { candidate },
-                            })
-                            }
-                            className="bg-gray-900 text-white px-4 py-2 rounded-lg
-                                    text-sm font-medium hover:bg-gray-800 transition"
-                        >
-                            Generate Offer
-                        </button>
+                        {candidate.status === "Offer Sent" ? (
+                            <button
+                                disabled
+                                className="bg-gray-200 text-gray-500 px-4 py-2 rounded-lg
+                                        text-sm font-medium cursor-not-allowed"
+                            >
+                                Offer Already Generated
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() =>
+                                    navigate("/generate-offer", {
+                                        state: { candidate },
+                                    })
+                                }
+                                className="bg-gray-900 text-white px-4 py-2 rounded-lg
+                                        text-sm font-medium hover:bg-gray-800 transition"
+                            >
+                                Generate Offer
+                            </button>
+                        )}
                     </td>
                     </tr>
                 ))}
