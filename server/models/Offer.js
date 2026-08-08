@@ -2,6 +2,13 @@ const mongoose = require("mongoose");
 
 const offerSchema = new mongoose.Schema(
   {
+    candidateId: {
+      type: String,
+      required: true,
+      trim: true,
+      unique: true,
+    },
+    
     candidateName: {
       type: String,
       required: true,

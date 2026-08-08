@@ -17,6 +17,18 @@ router.post("/generate", async (req, res) => {
     }
 
     console.log("Generating offer for:", candidate.candidateName);
+    
+    
+    // Check if an offer already exists for this candidate
+    const existingOffer = await Offer.findOne({
+    candidateId: candidate.candidateId,
+    });
+
+    if (existingOffer) {
+    return res.status(409).json({
+        message: "Offer letter has already been generated for this candidate",
+    });
+    }
 
     const [day, month, year] = candidate.startDate.split("/");
 
@@ -27,20 +39,21 @@ router.post("/generate", async (req, res) => {
     );
 
     const offer = await Offer.create({
-    candidateName: candidate.candidateName,
-    candidateEmail: candidate.email,
-    designation: candidate.designation,
-    department: candidate.department,
+        candidateId: candidate.candidateId,
+        candidateName: candidate.candidateName,
+        candidateEmail: candidate.email,
+        designation: candidate.designation,
+        department: candidate.department,
 
-    dateOfJoining: dateOfJoining,
+        dateOfJoining: dateOfJoining,
 
-    stipendOrCTC: candidate.stipend,
+        stipendOrCTC: candidate.stipend,
 
-    reportingManager: "HR Manager",
+        reportingManager: "HR Manager",
 
-    offerIssueDate: new Date(),
+        offerIssueDate: new Date(),
 
-    emailStatus: "Pending",
+        emailStatus: "Pending",
     });
 
     console.log("Offer saved to MongoDB:", offer._id);
