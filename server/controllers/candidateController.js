@@ -1,4 +1,4 @@
-const sheets = require("../config/googleSheets");
+const { sheets } = require("../config/googleSheets");
 
 const getCandidates = async (req, res) => {
   try {

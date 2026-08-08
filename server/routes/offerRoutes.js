@@ -2,6 +2,7 @@ const express = require("express");
 const generateOfferPDF = require("../services/pdfService");
 const Offer = require("../models/Offer");
 const transporter = require("../services/emailService");
+const { updateCandidateStatus } = require("../config/googleSheets");
 
 const router = express.Router();
 
@@ -84,6 +85,13 @@ router.post("/generate", async (req, res) => {
     });
     offer.emailStatus = "Sent";
     await offer.save();
+
+    await updateCandidateStatus(
+      process.env.GOOGLE_SHEET_ID,
+      "Sheet1",
+      candidate.candidateId,
+      "Offer Sent"
+    );
 
     console.log("Email sent successfully to:", candidate.email);
     console.log("Email status updated to Sent");
