@@ -3,12 +3,13 @@ const generateOfferPDF = require("../services/pdfService");
 const Offer = require("../models/Offer");
 const transporter = require("../services/emailService");
 const { updateCandidateStatus } = require("../config/googleSheets");
+const protect = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
 
 // Generate Offer
-router.post("/generate", async (req, res) => {
+router.post("/generate", protect, async (req, res) => {
   try {
     const candidate = req.body;
 
@@ -76,12 +77,12 @@ router.post("/generate", async (req, res) => {
 
         text: `Dear ${candidate.candidateName},
 
-Congratulations!
+        Congratulations!
 
-Please find your internship offer letter attached.
+        Please find your internship offer letter attached.
 
-Regards,
-HR Department`,
+        Regards,
+        HR Department`,
 
         attachments: [
           {
@@ -170,7 +171,7 @@ HR Department`,
 
 
 // Get all generated offers
-router.get("/", async (req, res) => {
+router.get("/", protect, async (req, res) => {
   try {
     const offers = await Offer.find().sort({
       createdAt: -1,

@@ -12,7 +12,16 @@ function Candidates() {
     useEffect(() => {
         const fetchCandidates = async () => {
         try {
-            const response = await fetch("http://localhost:5000/api/candidates");
+            const token = localStorage.getItem("token");
+
+            const response = await fetch(
+                "http://localhost:5000/api/candidates",
+                {
+                    headers: {
+                    Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
 
             if (!response.ok) {
             throw new Error("Failed to fetch candidates");

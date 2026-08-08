@@ -5,6 +5,7 @@ function Dashboard() {
   const navigate = useNavigate();
 
   const user = JSON.parse(localStorage.getItem("user"));
+  const token = localStorage.getItem("token");
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -20,7 +21,12 @@ function Dashboard() {
   const fetchOfferCount = async () => {
     try {
       const response = await fetch(
-        "http://localhost:5000/api/offers"
+        "http://localhost:5000/api/offers",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       if (!response.ok) {
@@ -54,7 +60,12 @@ function Dashboard() {
   const fetchCandidateCount = async () => {
     try {
       const response = await fetch(
-        "http://localhost:5000/api/candidates"
+        "http://localhost:5000/api/candidates",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       if (!response.ok) {

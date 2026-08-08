@@ -9,8 +9,16 @@ function OfferHistory() {
     useEffect(() => {
     const fetchOffers = async () => {
         try {
-        const response = await fetch("http://localhost:5000/api/offers");
+        const token = localStorage.getItem("token");
 
+        const response = await fetch(
+        "http://localhost:5000/api/offers",
+        {
+            headers: {
+            Authorization: `Bearer ${token}`,
+            },
+        }
+        );
         if (!response.ok) {
             throw new Error("Failed to fetch offer history");
         }
