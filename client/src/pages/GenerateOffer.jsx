@@ -22,7 +22,13 @@ function GenerateOffer() {
     );
 
     if (!response.ok) {
-      throw new Error("Failed to generate offer letter");
+      const errorData = await response.json();
+
+      if (response.status === 409) {
+        throw new Error(errorData.message);
+      }
+
+      throw new Error(errorData.message || "Failed to generate offer letter");
     }
 
     // Convert response into PDF blob
