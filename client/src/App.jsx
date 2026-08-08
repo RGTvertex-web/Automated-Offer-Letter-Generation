@@ -27,7 +27,12 @@ function App() {
                                                <ProtectedRoute> <GenerateOffer /> </ProtectedRoute> 
                                                }/>
       
-        <Route path="/offer-history" element={<OfferHistory />} />
+        <Route path="/offer-history" element={
+                                          <ProtectedRoute>
+                                            <OfferHistory />
+                                          </ProtectedRoute>
+            }
+          />
       </Routes>
 
        
