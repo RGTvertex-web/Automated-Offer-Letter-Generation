@@ -112,6 +112,7 @@ router.post("/generate", protect, async (req, res) => {
 
       return res.status(500).json({
         message: "Offer generated, but email could not be sent",
+        error: emailError.message,
       });
     }
 
@@ -189,9 +190,10 @@ router.get("/", protect, async (req, res) => {
       error
     );
 
-    res.status(500).json({
-      message: "Failed to fetch offers",
-    });
+   return res.status(500).json({
+    message: "Offer generated, but email could not be sent",
+    error: emailError.message,
+  });
   }
 });
 
