@@ -7,29 +7,29 @@ let auth;
 const secretFilePath = "/etc/secrets/google-service-account.json";
 
 if (fs.existsSync(secretFilePath)) {
-    // Production: Render Secret File
-    auth = new google.auth.GoogleAuth({
-        keyFile: secretFilePath,
-        scopes: [
-            "https://www.googleapis.com/auth/spreadsheets",
-        ],
-    });
+  // Production: Render Secret File
+  auth = new google.auth.GoogleAuth({
+    keyFile: secretFilePath,
+    scopes: [
+      "https://www.googleapis.com/auth/spreadsheets",
+    ],
+  });
 } else {
-    // Local development
-    auth = new google.auth.GoogleAuth({
-        keyFile: path.join(
-            __dirname,
-            "../credentials/google-service-account.json"
-        ),
-        scopes: [
-            "https://www.googleapis.com/auth/spreadsheets",
-        ],
-    });
+  // Local development
+  auth = new google.auth.GoogleAuth({
+    keyFile: path.join(
+      __dirname,
+      "../credentials/google-service-account.json"
+    ),
+    scopes: [
+      "https://www.googleapis.com/auth/spreadsheets",
+    ],
+  });
 }
 
 const sheets = google.sheets({
-    version: "v4",
-    auth,
+  version: "v4",
+  auth,
 });
 
 const updateCandidateStatus = async (
@@ -46,7 +46,6 @@ const updateCandidateStatus = async (
 
     const rows = response.data.values || [];
 
-
     if (rows.length === 0) {
       throw new Error("Google Sheet is empty");
     }
@@ -54,8 +53,6 @@ const updateCandidateStatus = async (
     const headers = rows[0].map((header) =>
       String(header).trim().replace(/^\uFEFF/, "")
     );
-
-
 
     const candidateIdIndex = headers.indexOf("Candidate ID");
     const statusIndex = headers.indexOf("Status");
@@ -80,6 +77,7 @@ const updateCandidateStatus = async (
     }
 
     const sheetRowNumber = candidateRowIndex + 1;
+
     const statusColumnLetter = String.fromCharCode(
       65 + statusIndex
     );
