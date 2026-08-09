@@ -1,16 +1,32 @@
 const { google } = require("googleapis");
 const path = require("path");
 
-const auth = new google.auth.GoogleAuth({
-  keyFile: path.join(
-    __dirname,
-    "../credentials/google-service-account.json"
-  ),
+let auth;
 
-  scopes: [
-    "https://www.googleapis.com/auth/spreadsheets",
-  ],
-});
+if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
+  // Production: use credentials from environment variable
+  const credentials = JSON.parse(
+    process.env.GOOGLE_SERVICE_ACCOUNT_JSON
+  );
+
+  auth = new google.auth.GoogleAuth({
+    credentials,
+    scopes: [
+      "https://www.googleapis.com/auth/spreadsheets",
+    ],
+  });
+} else {
+  // Local development: use local service account file
+  auth = new google.auth.GoogleAuth({
+    keyFile: path.join(
+      __dirname,
+      "../credentials/google-service-account.json"
+    ),
+    scopes: [
+      "https://www.googleapis.com/auth/spreadsheets",
+    ],
+  });
+}
 
 const sheets = google.sheets({
   version: "v4",
