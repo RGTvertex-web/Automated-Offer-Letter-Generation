@@ -1,7 +1,7 @@
 const express = require("express");
 const generateOfferPDF = require("../services/pdfService");
 const Offer = require("../models/Offer");
-const transporter = require("../services/emailService");
+const resend = require("../services/emailService");
 const { updateCandidateStatus } = require("../config/googleSheets");
 const protect = require("../middleware/authMiddleware");
 
@@ -70,12 +70,12 @@ router.post("/generate", protect, async (req, res) => {
     // ------------------------------------------------
 
     try {
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: candidate.email,
-        subject: `Internship Offer Letter - ${candidate.candidateName}`,
+      await resend.emails.send({
+          from: "onboarding@resend.dev",
+          to: candidate.email,
+          subject: `Internship Offer Letter - ${candidate.candidateName}`,
 
-        text: `Dear ${candidate.candidateName},
+          text: `Dear ${candidate.candidateName},
 
         Congratulations!
 
@@ -84,14 +84,13 @@ router.post("/generate", protect, async (req, res) => {
         Regards,
         HR Department`,
 
-        attachments: [
-          {
-            filename: `Offer_${candidate.candidateId}.pdf`,
-            content: pdfBuffer,
-            contentType: "application/pdf",
-          },
-        ],
-      });
+          attachments: [
+            {
+              filename: `Offer_${candidate.candidateId}.pdf`,
+              content: pdfBuffer,
+            },
+          ],
+        });
 
       // Email successfully sent
       offer.emailStatus = "Sent";

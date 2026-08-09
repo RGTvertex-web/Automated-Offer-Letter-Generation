@@ -12,7 +12,7 @@ function OfferHistory() {
         const token = localStorage.getItem("token");
 
         const response = await fetch(
-        "http://localhost:5000/api/offers",
+        `${import.meta.env.VITE_API_URL}/offers`,
         {
             headers: {
             Authorization: `Bearer ${token}`,

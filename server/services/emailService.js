@@ -1,19 +1,5 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
-console.log("EMAIL_USER loaded:", !!process.env.EMAIL_USER);
-console.log("EMAIL_PASS loaded:", !!process.env.EMAIL_PASS);
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 10000,
-});
-
-module.exports = transporter;
+module.exports = resend;
