@@ -186,8 +186,9 @@ function Dashboard() {
             </button>
 
             <button
+              onClick={() => navigate("/candidates")}
               className="border border-gray-300 text-gray-700 px-5 py-3
-                         rounded-lg font-medium hover:bg-gray-100 transition"
+                        rounded-lg font-medium hover:bg-gray-100 transition"
             >
               Generate Offer
             </button>
