@@ -1,36 +1,35 @@
 const { google } = require("googleapis");
 const path = require("path");
+const fs = require("fs");
 
 let auth;
 
-if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
-  // Production: use credentials from environment variable
-  const credentials = JSON.parse(
-    process.env.GOOGLE_SERVICE_ACCOUNT_JSON
-  );
+const secretFilePath = "/etc/secrets/google-service-account.json";
 
-  auth = new google.auth.GoogleAuth({
-    credentials,
-    scopes: [
-      "https://www.googleapis.com/auth/spreadsheets",
-    ],
-  });
+if (fs.existsSync(secretFilePath)) {
+    // Production: Render Secret File
+    auth = new google.auth.GoogleAuth({
+        keyFile: secretFilePath,
+        scopes: [
+            "https://www.googleapis.com/auth/spreadsheets",
+        ],
+    });
 } else {
-  // Local development: use local service account file
-  auth = new google.auth.GoogleAuth({
-    keyFile: path.join(
-      __dirname,
-      "../credentials/google-service-account.json"
-    ),
-    scopes: [
-      "https://www.googleapis.com/auth/spreadsheets",
-    ],
-  });
+    // Local development
+    auth = new google.auth.GoogleAuth({
+        keyFile: path.join(
+            __dirname,
+            "../credentials/google-service-account.json"
+        ),
+        scopes: [
+            "https://www.googleapis.com/auth/spreadsheets",
+        ],
+    });
 }
 
 const sheets = google.sheets({
-  version: "v4",
-  auth,
+    version: "v4",
+    auth,
 });
 
 const updateCandidateStatus = async (
