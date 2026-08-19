@@ -1,21 +1,14 @@
 # Dependencies
 node_modules/
-client/node_modules/
-server/node_modules/
 
 # Environment variables
 .env
-client/.env
-server/.env
+.env.*
+!.env.example
 
-# Build
-client/dist/
+# Generated files
+server/generated-pdfs/
 
-# Mac
+# macOS
 .DS_Store
-
-# Logs
-*.log
-
-# Google service account credentials
-server/credentials/
+server/generated-pdfs/
